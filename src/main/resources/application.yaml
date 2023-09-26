@@ -1,0 +1,16 @@
+server:
+  port: 5000
+# Swagger path
+springdoc:
+  api-docs:
+    path: /api-docs
+# Swagger version
+my:
+  api:
+    version: @project.version@
+    title: Online store project backend API
+    description: This is a documentation of the API Online store project backend
+# Logging
+logging:
+  level:
+    root: INFO
