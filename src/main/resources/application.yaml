@@ -1,5 +1,16 @@
 server:
   port: 5000
+# Datasource
+spring:
+  datasource:
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+    url: jdbc:hsqldb:mem:restapi;DB_CLOSE_DELAY=-1
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 # Swagger path
 springdoc:
   api-docs:
