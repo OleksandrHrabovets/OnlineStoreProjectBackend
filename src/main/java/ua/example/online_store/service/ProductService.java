@@ -2,68 +2,77 @@ package ua.example.online_store.service;
 
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ua.example.online_store.web.dto.CategoryDto;
-import ua.example.online_store.web.dto.CurrencyDto;
-import ua.example.online_store.web.dto.PriceDto;
-import ua.example.online_store.web.dto.ProductDto;
-import ua.example.online_store.web.mapper.CategoryMapper;
+import ua.example.online_store.model.Category;
+import ua.example.online_store.model.Currency;
+import ua.example.online_store.model.Price;
+import ua.example.online_store.model.Product;
+import ua.example.online_store.repository.PriceRepository;
+import ua.example.online_store.repository.ProductRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
+  private final ProductRepository productRepository;
+  private final PriceRepository priceRepository;
   private final CategoryService categoryService;
-  private final CategoryMapper categoryMapper;
-  private final List<ProductDto> products = new ArrayList<>();
-
 
   @PostConstruct
   private void init() {
 
-    CurrencyDto currencyUAH = CurrencyDto.builder()
-        .id(1L)
-        .code("UAH")
-        .title("Гривня")
-        .build();
+    if (productRepository.findAll().isEmpty()) {
+      List<Product> products = new ArrayList<>();
+      Currency currencyUAH = Currency.builder()
+          .id(1L)
+          .code("UAH")
+          .title("Гривня")
+          .build();
 
-    List<CategoryDto> categoriesDto = categoryMapper.toDto(categoryService.getAll());
-    CategoryDto category1 = categoriesDto.get(0);
-    CategoryDto category2 = categoriesDto.get(1);
+      List<Category> categories = categoryService.getAll();
+      Category category1 = categories.get(0);
+      Category category2 = categories.get(1);
 
-    products.add(
-        ProductDto.builder()
-            .id(1L)
-            .title("Футболка жіноча Nike")
-            .description("Футболка жіноча Nike ... повний опис")
-            .price(PriceDto.builder()
-                .currency(currencyUAH)
-                .value(500)
-                .build())
-            .category(category1)
-            .skuSet(new HashSet<>())
-            .status(true)
-            .build()
-    );
-    products.add(
-        ProductDto.builder()
-            .id(2L)
-            .title("Спортивний костюм жіночий Nike")
-            .description("Спортивний костюм жіночий Nike ... повний опис")
-            .price(PriceDto.builder()
-                .currency(currencyUAH)
-                .value(2500)
-                .build())
-            .category(category2)
-            .skuSet(new HashSet<>())
-            .status(true)
-            .build());
+      Price price1 = Price.builder()
+          .currency(currencyUAH)
+          .value(500)
+          .build();
+      Price price2 = Price.builder()
+          .currency(currencyUAH)
+          .value(2500)
+          .build();
+      priceRepository.saveAll(List.of(price1, price2));
+
+      products.add(
+          Product.builder()
+              .id(1L)
+              .title("Футболка жіноча Nike")
+              .description("Футболка жіноча Nike ... повний опис")
+              .price(price1)
+              .category(category1)
+              .status(true)
+              .build()
+      );
+      products.add(
+          Product.builder()
+              .id(2L)
+              .title("Спортивний костюм жіночий Nike")
+              .description("Спортивний костюм жіночий Nike ... повний опис")
+              .price(price2)
+              .category(category2)
+              .status(true)
+              .build());
+      productRepository.saveAll(products);
+    }
+
   }
 
-  public List<ProductDto> getAll() {
-    return products;
+  public List<Product> getAll() {
+    log.info("invoked method {}", "getAll()");
+    return productRepository.findAll();
   }
 }

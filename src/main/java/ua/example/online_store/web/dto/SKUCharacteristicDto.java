@@ -8,7 +8,6 @@ import lombok.Data;
 public class SKUCharacteristicDto {
 
   private Long id;
-  private SKUDto sku;
   private CharacteristicDto characteristic;
   private String value;
 

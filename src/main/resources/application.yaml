@@ -3,13 +3,20 @@ server:
 # Datasource
 spring:
   datasource:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-    url: jdbc:hsqldb:mem:restapi;DB_CLOSE_DELAY=-1
-    username: sa
-    password: password
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  sql:
+    init:
+      schema-locations: classpath*:database/schema.sql
+      mode: always
   jpa:
+    database: POSTGRESQL
     hibernate:
       ddl-auto: update
+    open-in-view: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 # Swagger path
 springdoc:
