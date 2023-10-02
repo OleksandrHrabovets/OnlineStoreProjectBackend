@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +31,7 @@ public class Product {
   private Long id;
   private String title;
   private String description;
-  @ManyToOne(targetEntity = Price.class)
+  @OneToOne(targetEntity = Price.class)
   private Price price;
   @ManyToOne(targetEntity = Category.class)
   private Category category;

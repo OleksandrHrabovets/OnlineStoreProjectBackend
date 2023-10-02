@@ -30,4 +30,9 @@ public class SKU {
   private Set<SKUCharacteristic> characteristics;
   private boolean status;
 
+  public void setProduct(Product product) {
+    this.product = product;
+    this.product.getSkuSet().add(this);
+  }
+
 }
