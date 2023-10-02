@@ -28,9 +28,4 @@ public class SKUCharacteristic {
   private Characteristic characteristic;
   private String value;
 
-  public void setSku(SKU sku) {
-    this.sku = sku;
-    this.sku.getCharacteristics().add(this);
-  }
-
 }

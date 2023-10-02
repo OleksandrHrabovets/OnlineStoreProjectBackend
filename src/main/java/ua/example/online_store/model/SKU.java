@@ -4,9 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import java.util.Set;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,15 +25,11 @@ public class SKU {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @ManyToOne(targetEntity = Product.class)
+  @ManyToOne
+  @JoinColumn(name = "product_id", referencedColumnName = "id")
   private Product product;
   @OneToMany(targetEntity = SKUCharacteristic.class, mappedBy = "sku")
-  private Set<SKUCharacteristic> characteristics;
+  private List<SKUCharacteristic> characteristics;
   private boolean status;
-
-  public void setProduct(Product product) {
-    this.product = product;
-    this.product.getSkuSet().add(this);
-  }
 
 }

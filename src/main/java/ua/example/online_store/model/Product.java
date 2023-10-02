@@ -6,12 +6,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import java.util.Set;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,10 +34,7 @@ public class Product {
   @ManyToOne(targetEntity = Category.class)
   private Category category;
   private boolean status;
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-  @JoinTable(name = "product_sku",
-      joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
-      inverseJoinColumns = @JoinColumn(name = "sku_id", referencedColumnName = "id"))
-  private Set<SKU> skuSet;
+  @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private List<SKU> skuSet;
 
 }

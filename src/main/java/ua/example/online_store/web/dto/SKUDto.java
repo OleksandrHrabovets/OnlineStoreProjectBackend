@@ -1,6 +1,6 @@
 package ua.example.online_store.web.dto;
 
-import java.util.Set;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,8 +8,7 @@ import lombok.Data;
 @Builder
 public class SKUDto {
 
-  private ProductDto product;
-  private Set<SKUCharacteristicDto> characteristics;
+  private List<SKUCharacteristicDto> characteristics;
   private boolean status;
 
 }
