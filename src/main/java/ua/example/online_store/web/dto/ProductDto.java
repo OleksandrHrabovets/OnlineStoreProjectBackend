@@ -15,5 +15,6 @@ public class ProductDto {
   private CategoryDto category;
   private boolean status;
   private List<SKUDto> skuSet;
+  private List<PhotoDto> photos;
 
 }
