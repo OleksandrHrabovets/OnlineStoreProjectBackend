@@ -3,6 +3,7 @@ package ua.example.online_store.service;
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,5 +40,9 @@ public class CategoryService {
   public List<Category> getAll() {
     log.info("invoked method {}", "getAll()");
     return categoryRepository.findAll();
+  }
+
+  public Optional<Category> findById(Long id) {
+    return categoryRepository.findById(id);
   }
 }

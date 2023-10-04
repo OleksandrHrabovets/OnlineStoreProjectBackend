@@ -36,5 +36,7 @@ public class Product {
   private boolean status;
   @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   private List<SKU> skuSet;
+  @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private List<Photo> photos;
 
 }

@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class SKUDto {
 
+  private Long id;
   private List<SKUCharacteristicDto> characteristics;
   private boolean status;
 
