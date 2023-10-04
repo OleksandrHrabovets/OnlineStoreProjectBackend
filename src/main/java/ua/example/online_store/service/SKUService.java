@@ -30,7 +30,7 @@ public class SKUService {
   private void init() {
 
     if (skuRepository.findAll().isEmpty()) {
-      List<Product> products = productService.getAll();
+      List<Product> products = productService.getAll(null, "", null).toList();
       Product product1 = products.get(0);
       Product product2 = products.get(1);
 

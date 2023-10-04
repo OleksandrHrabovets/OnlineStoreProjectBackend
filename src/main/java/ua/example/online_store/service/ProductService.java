@@ -1,10 +1,15 @@
 package ua.example.online_store.service;
 
+import static org.springframework.data.jpa.domain.Specification.where;
+
 import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ua.example.online_store.model.Category;
 import ua.example.online_store.model.Currency;
@@ -71,8 +76,28 @@ public class ProductService {
 
   }
 
-  public List<Product> getAll() {
+  public Page<Product> getAll(Pageable pageable, String title, Long categoryId) {
     log.info("invoked method {}", "getAll()");
-    return productRepository.findAll();
+    Specification<Product> specification = null;
+    if (title != null && !title.isEmpty()) {
+      specification = where(titleSpecification(title)).and(specification);
+    }
+    if (categoryId != null) {
+      Category category = categoryService.findById(categoryId).orElseThrow();
+      specification = where(categorySpecification(category)).and(specification);
+    }
+    return productRepository.findAll(specification, pageable);
+  }
+
+  private Specification<Product> titleSpecification(String title) {
+    return (root, query, criteriaBuilder)
+        -> criteriaBuilder.like(criteriaBuilder.lower(root.
+            get("title")),
+        "%" + title.toLowerCase() + "%");
+  }
+
+  private Specification<Product> categorySpecification(Category category) {
+    return (root, query, criteriaBuilder)
+        -> criteriaBuilder.equal(root.get("category"), category);
   }
 }
