@@ -45,6 +45,7 @@ public class CartController {
   }
 
   @DeleteMapping
+  @ResponseStatus(HttpStatus.OK)
   public void delete(
       @RequestParam String sessionId,
       @RequestParam Long skuId) {
@@ -53,6 +54,7 @@ public class CartController {
   }
 
   @DeleteMapping("/clear")
+  @ResponseStatus(HttpStatus.OK)
   public void clear(@RequestParam String sessionId) {
     log.info(INVOKED_METHOD, "clear()");
     cartService.clear(sessionId);
