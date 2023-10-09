@@ -64,19 +64,19 @@ public class CartService {
 
   public void delete(String sessionId, Long skuId) {
     log.info(INVOKED_METHOD, "delete()");
-    Cart cart = cartRepository.findBySessionId(sessionId).orElseThrow();
-    cart.getItems().stream().
+    Cart cart = cartRepository.findBySessionId(sessionId)
+        .orElseThrow(() -> new NotFoundException("sessionId not found"));
+    cartItemRepository.delete(cart.getItems().stream().
         filter(cartItem ->
-            cartItem.getSku().getId().equals(skuId))
-        .forEach(cartItem ->
-            cart.getItems().remove(cartItem));
-    cartRepository.save(cart);
+            cartItem.getSku().getId().equals(skuId)).findFirst()
+        .orElseThrow(() -> new NotFoundException("sku not found")));
   }
 
   public void clear(String sessionId) {
     log.info(INVOKED_METHOD, "clear()");
-    Cart cart = cartRepository.findBySessionId(sessionId).orElseThrow();
-    cartRepository.delete(cart);
+    Cart cart = cartRepository.findBySessionId(sessionId)
+        .orElseThrow(() -> new NotFoundException("sessionId not found"));
+    cartItemRepository.deleteAll(cart.getItems());
   }
 
 }
