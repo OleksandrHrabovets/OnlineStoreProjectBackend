@@ -23,6 +23,7 @@ import ua.example.online_store.repository.ProductRepository;
 @RequiredArgsConstructor
 public class ProductService {
 
+  public static final String INVOKED_METHOD = "invoked method {}";
   private final ProductRepository productRepository;
   private final PriceRepository priceRepository;
   private final CategoryService categoryService;
@@ -77,7 +78,7 @@ public class ProductService {
   }
 
   public Page<Product> getAll(Pageable pageable, String title, Long categoryId) {
-    log.info("invoked method {}", "getAll()");
+    log.info(INVOKED_METHOD, "getAll()");
     Specification<Product> specification = null;
     if (title != null && !title.isEmpty()) {
       specification = where(titleSpecification(title)).and(specification);
@@ -99,5 +100,29 @@ public class ProductService {
   private Specification<Product> categorySpecification(Category category) {
     return (root, query, criteriaBuilder)
         -> criteriaBuilder.equal(root.get("category"), category);
+  }
+
+  private Specification<Product> notEqualIdSpecification(Long id) {
+    return (root, query, criteriaBuilder)
+        -> criteriaBuilder.notEqual(root.get("id"), id);
+  }
+
+  private Specification<Product> priceGreaterThanSpecification(double price) {
+    return (root, query, criteriaBuilder)
+        -> criteriaBuilder.greaterThan(root.get("price").get("value"), price);
+  }
+
+
+  public Page<Product> getSimilarProducts(Pageable pageable, Long id) {
+    log.info(INVOKED_METHOD, "getAll()");
+    Specification<Product> specification = null;
+
+    Product product = productRepository.findById(id).orElseThrow();
+    specification = where(categorySpecification(product.getCategory())).and(specification);
+    specification = where(notEqualIdSpecification(id)).and(specification);
+    specification = where(priceGreaterThanSpecification(product.getPrice().getValue())).and(
+        specification);
+    return productRepository.findAll(specification, pageable);
+
   }
 }
