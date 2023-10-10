@@ -32,3 +32,7 @@ my:
 logging:
   level:
     root: INFO
+app:
+  security:
+    admin-password: ${ADMIN_PASSWORD}
+    user-password: ${USER_PASSWORD}
