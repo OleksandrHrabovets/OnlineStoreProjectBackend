@@ -1,5 +1,6 @@
 package ua.example.online_store.web.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import ua.example.online_store.web.mapper.AvailableQuantityMapper;
 @RestController
 @RequestMapping("/api/v1/available_quantities")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Authorization")
 public class AvailableQuantityController {
 
   private final AvailableQuantityService availableQuantityService;

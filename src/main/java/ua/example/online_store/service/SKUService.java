@@ -88,4 +88,9 @@ public class SKUService {
     return skuRepository.findById(id);
   }
 
+  public List<SKU> findAllByStatus(boolean status) {
+    log.info("invoked method {}", "getAll()");
+    return skuRepository.findAllByStatus(status);
+  }
+
 }
