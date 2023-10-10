@@ -1,14 +1,12 @@
-package ua.example.online_store.model;
+package ua.example.online_store.model.subscription;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.util.List;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,16 +19,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SKU {
+public class Subscriber {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   @ManyToOne
-  @JoinColumn(name = "product_id", referencedColumnName = "id")
-  private Product product;
-  @OneToMany(fetch = FetchType.EAGER, targetEntity = SKUCharacteristic.class, mappedBy = "sku")
-  private List<SKUCharacteristic> characteristics;
-  private boolean status;
+  @JoinColumn(name = "subscription_id", referencedColumnName = "id")
+  private Subscription subscription;
+  @Email
+  private String email;
 
 }

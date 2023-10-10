@@ -52,6 +52,12 @@
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
+    <!-- email -->
+    <dependency>
+      <artifactId>spring-boot-starter-mail</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+
     <!--mapstruct-->
     <dependency>
       <groupId>org.mapstruct</groupId>
