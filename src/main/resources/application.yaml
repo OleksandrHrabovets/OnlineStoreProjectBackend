@@ -52,3 +52,4 @@ app:
   subscription:
     time:
       cron: 0 0 9 * * *
+      zone: Europe/Kiev
