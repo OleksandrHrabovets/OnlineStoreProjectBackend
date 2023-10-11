@@ -1,5 +1,6 @@
 package ua.example.online_store.web.controller.subscription;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class SubscriptionController {
 
   @PostMapping
   public ResponseEntity<Subscriber> subscribe(@RequestParam Long subscriptionId,
-      @Email @RequestParam String email) {
+      @Valid @Email @RequestParam String email) {
     log.info(INVOKED_METHOD, "subscribe()");
     Subscriber subscriber = subscriberService.findAllBySubscriptionIdAndEmail(
             subscriptionId, email)
@@ -51,7 +52,8 @@ public class SubscriptionController {
 
   @DeleteMapping
   @ResponseStatus(HttpStatus.OK)
-  public void unsubscribe(@RequestParam Long subscriptionId, @RequestParam String email) {
+  public void unsubscribe(@RequestParam Long subscriptionId,
+      @Valid @Email @RequestParam String email) {
     log.info(INVOKED_METHOD, "unsubscribe()");
     Subscriber subscriber = subscriberService.findAllBySubscriptionIdAndEmail(
             subscriptionId, email)
