@@ -64,7 +64,9 @@ public class SecurityBasicConfiguration {
                     .requestMatchers(
                         "/swagger-ui/**", "/api-docs/**").permitAll()
                     .requestMatchers(HttpMethod.POST,
-                        "/api/*/available_quantities").authenticated()
+                        "/api/*/available_quantities",
+                        "/api/*/categories",
+                        "/api/*/products").authenticated()
                     .anyRequest().permitAll()
         )
         .httpBasic(Customizer.withDefaults());
