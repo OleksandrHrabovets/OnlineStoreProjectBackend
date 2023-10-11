@@ -41,7 +41,7 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
     log.info("Unsubscribe {} successfully", email);
   }
 
-  @Scheduled(cron = "${app.subscription.time.cron}")
+  @Scheduled(cron = "${app.subscription.time.cron}", zone = "${app.subscription.time.zone}")
   @Override
   public void notifySubscribers() {
 
@@ -60,7 +60,9 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
         .reduce(
             "Нові товари в нашому магазині:",
             (s, sku) -> s + "\n   -"
-                + sku.getProduct().getTitle() + "(" + skuCharacteristicsToString(sku) + ")",
+                + sku.getProduct().getTitle() + "(" + skuCharacteristicsToString(sku) + ") - ціна "
+                + sku.getProduct().getPrice().getValue()
+                + sku.getProduct().getPrice().getCurrency().getCode(),
             String::concat);
   }
 
