@@ -9,12 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ua.example.online_store.model.Category;
 import ua.example.online_store.repository.CategoryRepository;
+import ua.example.online_store.web.dto.CategoryDto;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
 
+  public static final String INVOKED_METHOD = "invoked method {}";
   private final CategoryRepository categoryRepository;
 
   @PostConstruct
@@ -38,11 +40,20 @@ public class CategoryService {
   }
 
   public List<Category> getAll() {
-    log.info("invoked method {}", "getAll()");
+    log.info(INVOKED_METHOD, "getAll()");
     return categoryRepository.findAll();
   }
 
   public Optional<Category> findById(Long id) {
     return categoryRepository.findById(id);
+  }
+
+  public Category addCategory(CategoryDto categoryDto) {
+    log.info(INVOKED_METHOD, "addCategory()");
+    Category category = categoryRepository.findById(categoryDto.getId())
+        .orElse(Category.builder()
+            .build());
+    category.setTitle(categoryDto.getTitle());
+    return categoryRepository.save(category);
   }
 }

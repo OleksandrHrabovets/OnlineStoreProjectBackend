@@ -2,21 +2,25 @@ package ua.example.online_store.service;
 
 import static org.springframework.data.jpa.domain.Specification.where;
 
-import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.webjars.NotFoundException;
 import ua.example.online_store.model.Category;
-import ua.example.online_store.model.Currency;
-import ua.example.online_store.model.Price;
+import ua.example.online_store.model.Photo;
 import ua.example.online_store.model.Product;
+import ua.example.online_store.model.SKU;
 import ua.example.online_store.repository.PriceRepository;
 import ua.example.online_store.repository.ProductRepository;
+import ua.example.online_store.web.dto.ProductDto;
+import ua.example.online_store.web.mapper.PhotoMapper;
+import ua.example.online_store.web.mapper.SKUMapper;
 
 @Slf4j
 @Service
@@ -27,55 +31,12 @@ public class ProductService {
   private final ProductRepository productRepository;
   private final PriceRepository priceRepository;
   private final CategoryService categoryService;
-
-  @PostConstruct
-  private void init() {
-
-    if (productRepository.findAll().isEmpty()) {
-      List<Product> products = new ArrayList<>();
-      Currency currencyUAH = Currency.builder()
-          .id(1L)
-          .code("UAH")
-          .title("Гривня")
-          .build();
-
-      List<Category> categories = categoryService.getAll();
-      Category category1 = categories.get(0);
-      Category category2 = categories.get(1);
-
-      Price price1 = Price.builder()
-          .currency(currencyUAH)
-          .value(500)
-          .build();
-      Price price2 = Price.builder()
-          .currency(currencyUAH)
-          .value(2500)
-          .build();
-      priceRepository.saveAll(List.of(price1, price2));
-
-      products.add(
-          Product.builder()
-              .id(1L)
-              .title("Футболка жіноча Nike")
-              .description("Футболка жіноча Nike ... повний опис")
-              .price(price1)
-              .category(category1)
-              .status(true)
-              .build()
-      );
-      products.add(
-          Product.builder()
-              .id(2L)
-              .title("Спортивний костюм жіночий Nike")
-              .description("Спортивний костюм жіночий Nike ... повний опис")
-              .price(price2)
-              .category(category2)
-              .status(true)
-              .build());
-      productRepository.saveAll(products);
-    }
-
-  }
+  private final PriceService priceService;
+  private final SKUService skuService;
+  private final SKUCharacteristicService skuCharacteristicService;
+  private final SKUMapper skuMapper;
+  private final PhotoMapper photoMapper;
+  private final PhotoService photoService;
 
   public Page<Product> getAll(Pageable pageable, String title, Long categoryId) {
     log.info(INVOKED_METHOD, "getAll()");
@@ -125,4 +86,47 @@ public class ProductService {
     return productRepository.findAll(specification, pageable);
 
   }
+
+  public Optional<Product> findById(Long id) {
+    return productRepository.findById(id);
+  }
+
+  @Transactional
+  public Product addProduct(ProductDto productDto) {
+    log.info(INVOKED_METHOD, "addProduct()");
+    Category category = categoryService.findById(productDto.getCategory().getId())
+        .orElseThrow(() -> new NotFoundException("category not found"));
+    Product product = productRepository.findById(productDto.getId())
+        .orElse(Product.builder()
+            .id(null)
+            .build());
+    product.setCategory(category);
+    product.setTitle(productDto.getTitle());
+    product.setDescription(productDto.getDescription());
+    product.setPrice(priceService.addPrice(productDto.getPrice()));
+    product.setStatus(true);
+    Product saveProduct = productRepository.save(product);
+
+    List<SKU> skuSet = productDto.getSkuSet().stream().map(skuMapper::toEntity).toList();
+    skuSet.forEach(sku -> {
+      sku.setId(null);
+      sku.setProduct(saveProduct);
+      sku.getCharacteristics().forEach(skuCharacteristic -> {
+        skuCharacteristic.setId(null);
+        skuCharacteristic.setSku(sku);
+      });
+      skuCharacteristicService.saveAll(sku.getCharacteristics());
+    });
+    skuService.saveAll(skuSet);
+
+    List<Photo> photos = productDto.getPhotos().stream().map(photoMapper::toEntity).toList();
+    photos.forEach(photo -> {
+      photo.setId(null);
+      photo.setProduct(saveProduct);
+    });
+    photoService.saveAll(photos);
+
+    return saveProduct;
+  }
+
 }
