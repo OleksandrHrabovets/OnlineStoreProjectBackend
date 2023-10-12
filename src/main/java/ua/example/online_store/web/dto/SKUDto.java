@@ -1,5 +1,6 @@
 package ua.example.online_store.web.dto;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.Data;
 public class SKUDto {
 
   private Long id;
+  @Valid
   private List<SKUCharacteristicDto> characteristics;
   private boolean status;
 

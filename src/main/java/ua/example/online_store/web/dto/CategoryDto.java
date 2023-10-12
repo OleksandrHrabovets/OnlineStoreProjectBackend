@@ -1,5 +1,6 @@
 package ua.example.online_store.web.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import lombok.Data;
 public class CategoryDto {
 
   private Long id;
+  @NotBlank
   private String title;
 
 }
