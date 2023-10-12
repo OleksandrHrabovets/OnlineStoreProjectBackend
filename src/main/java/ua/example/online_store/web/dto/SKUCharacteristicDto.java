@@ -1,5 +1,7 @@
 package ua.example.online_store.web.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,7 +10,9 @@ import lombok.Data;
 public class SKUCharacteristicDto {
 
   private Long id;
+  @Valid
   private CharacteristicDto characteristic;
+  @NotBlank
   private String value;
 
 }
