@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,7 +33,8 @@ public class OrderController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.OK)
-  public void makeOrder(@RequestParam String sessionId, @Valid OrderDeliveryDto orderDeliveryDto) {
+  public void makeOrder(@RequestParam String sessionId,
+      @Valid @RequestBody OrderDeliveryDto orderDeliveryDto) {
 
     log.info(INVOKED_METHOD, "makeOrder()");
     orderService.makeOrder(sessionId, orderDeliveryDto);
