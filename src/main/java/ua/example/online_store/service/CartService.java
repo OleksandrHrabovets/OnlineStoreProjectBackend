@@ -57,7 +57,7 @@ public class CartService {
                 .build());
     cartItem.setPrice(cartAddItemDto.getPrice());
     cartItem.setQuantity(cartItem.getQuantity().add(cartAddItemDto.getQuantity()));
-    cartItem.setAmount(cartItem.getPrice().multiply(cartItem.getQuantity()));
+    cartItem.setAmount(cartItem.getAmount().add(cartItem.getAmount()));
     cartItemRepository.save(cartItem);
     return cartRepository.save(cart);
   }
