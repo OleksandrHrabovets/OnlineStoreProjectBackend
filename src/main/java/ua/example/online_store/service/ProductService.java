@@ -16,7 +16,6 @@ import ua.example.online_store.model.Category;
 import ua.example.online_store.model.Photo;
 import ua.example.online_store.model.Product;
 import ua.example.online_store.model.SKU;
-import ua.example.online_store.repository.PriceRepository;
 import ua.example.online_store.repository.ProductRepository;
 import ua.example.online_store.web.dto.ProductDto;
 import ua.example.online_store.web.mapper.PhotoMapper;
@@ -29,7 +28,6 @@ public class ProductService {
 
   public static final String INVOKED_METHOD = "invoked method {}";
   private final ProductRepository productRepository;
-  private final PriceRepository priceRepository;
   private final CategoryService categoryService;
   private final PriceService priceService;
   private final SKUService skuService;
@@ -37,6 +35,11 @@ public class ProductService {
   private final SKUMapper skuMapper;
   private final PhotoMapper photoMapper;
   private final PhotoService photoService;
+
+  public Optional<Product> getProduct(Long id) {
+    log.info(INVOKED_METHOD, "getProduct()");
+    return productRepository.findById(id);
+  }
 
   public Page<Product> getAll(Pageable pageable, String title, Long categoryId) {
     log.info(INVOKED_METHOD, "getAll()");

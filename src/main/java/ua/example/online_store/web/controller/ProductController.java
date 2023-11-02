@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.webjars.NotFoundException;
 import ua.example.online_store.service.ProductService;
 import ua.example.online_store.web.dto.ProductDto;
 import ua.example.online_store.web.mapper.ProductMapper;
@@ -40,6 +41,13 @@ public class ProductController {
     log.info(INVOKED_METHOD, "getAll()");
     return ResponseEntity.ok(productService.getAll(pageable, title, categoryId)
         .map(productMapper::toDto));
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ProductDto> getProduct(@PathVariable Long id) {
+    log.info(INVOKED_METHOD, "getProduct()");
+    return ResponseEntity.ok(productMapper.toDto(productService.getProduct(id)
+        .orElseThrow(() -> new NotFoundException("Product not found"))));
   }
 
   @GetMapping("/similar_products/{id}")
