@@ -11,5 +11,7 @@ public class CategoryDto {
   private Long id;
   @NotBlank
   private String title;
+  private Long productCount;
+  private PriceDto minPrice;
 
 }
