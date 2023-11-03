@@ -7,6 +7,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 import ua.example.online_store.model.Category;
 import ua.example.online_store.model.Photo;
+import ua.example.online_store.model.Price;
 import ua.example.online_store.model.Product;
 import ua.example.online_store.model.SKU;
 import ua.example.online_store.repository.ProductRepository;
@@ -39,6 +41,17 @@ public class ProductService {
   public Optional<Product> getProduct(Long id) {
     log.info(INVOKED_METHOD, "getProduct()");
     return productRepository.findById(id);
+  }
+
+  public Long productCountInCategory(Long categoryId) {
+    Category category = categoryService.findById(categoryId).orElseThrow();
+    return productRepository.countByCategory(category);
+  }
+
+  public Price minPriceInCategory(Long categoryId) {
+    return productRepository.minPriceInCategory(categoryId, PageRequest.of(0, 1))
+        .stream().findFirst()
+        .orElse(Price.builder().build());
   }
 
   public Page<Product> getAll(Pageable pageable, String title, Long categoryId) {
