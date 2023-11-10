@@ -18,6 +18,9 @@ import ua.example.online_store.model.Photo;
 import ua.example.online_store.model.Price;
 import ua.example.online_store.model.Product;
 import ua.example.online_store.model.SKU;
+import ua.example.online_store.model.SKUCharacteristic;
+import ua.example.online_store.model.enums.Color;
+import ua.example.online_store.model.enums.Size;
 import ua.example.online_store.repository.ProductRepository;
 import ua.example.online_store.web.dto.ProductDto;
 import ua.example.online_store.web.mapper.PhotoMapper;
@@ -128,6 +131,7 @@ public class ProductService {
       sku.setId(null);
       sku.setProduct(saveProduct);
       sku.getCharacteristics().forEach(skuCharacteristic -> {
+        skuCharacteristic.setValue(mapValueOfSkuCharacteristic(skuCharacteristic));
         skuCharacteristic.setId(null);
         skuCharacteristic.setSku(sku);
       });
@@ -143,6 +147,17 @@ public class ProductService {
     photoService.saveAll(photos);
 
     return saveProduct;
+  }
+
+  public String mapValueOfSkuCharacteristic(SKUCharacteristic skuCharacteristic) {
+    if (skuCharacteristic.getId() == 2L) {
+      return Color.getColor(skuCharacteristic.getValue()).name();
+    } else if (skuCharacteristic.getId() == 1L) {
+      return Size.getSize(skuCharacteristic.getValue()).name();
+    } else {
+      throw new IllegalArgumentException(
+          "Can not map value of skuCharacteristic %s".formatted(skuCharacteristic.getValue()));
+    }
   }
 
 }
