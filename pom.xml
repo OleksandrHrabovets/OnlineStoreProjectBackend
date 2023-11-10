@@ -102,6 +102,7 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+          <imageName>onlinestoreprojectbackend</imageName>
         </configuration>
       </plugin>
     </plugins>
