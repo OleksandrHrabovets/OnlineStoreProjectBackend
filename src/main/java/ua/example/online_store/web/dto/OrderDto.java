@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
-import ua.example.online_store.model.OrderStatus;
+import ua.example.online_store.model.enums.OrderStatus;
 
 @Data
 @Builder

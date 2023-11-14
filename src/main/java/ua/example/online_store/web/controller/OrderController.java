@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ua.example.online_store.model.OrderStatus;
+import ua.example.online_store.model.enums.OrderStatus;
 import ua.example.online_store.service.OrderService;
 import ua.example.online_store.web.dto.OrderDeliveryDto;
 import ua.example.online_store.web.dto.OrderDto;

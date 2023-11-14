@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
 import ua.example.online_store.model.Cart;
+import ua.example.online_store.model.Currency;
 import ua.example.online_store.model.Order;
 import ua.example.online_store.model.OrderItem;
-import ua.example.online_store.model.OrderStatus;
+import ua.example.online_store.model.SKU;
+import ua.example.online_store.model.enums.OrderStatus;
 import ua.example.online_store.repository.OrderItemRepository;
 import ua.example.online_store.repository.OrderRepository;
+import ua.example.online_store.service.email.EmailService;
 import ua.example.online_store.web.dto.OrderDeliveryDto;
 
 @Slf4j
@@ -27,6 +30,7 @@ public class OrderService {
   private final CartService cartService;
   private final OrderDeliveryService orderDeliveryService;
 
+  private final EmailService emailService;
 
   public List<Order> getAll() {
     log.info(INVOKED_METHOD, "getAll()");
@@ -62,11 +66,73 @@ public class OrderService {
       orderItem.setQuantity(cartItem.getQuantity());
       orderItem.setAmount(cartItem.getAmount());
       orderItemRepository.save(orderItem);
+      order.getItems().add(orderItem);
     });
 
     order.setStatus(OrderStatus.NEW);
     order.setDelivery(orderDeliveryService.save(orderDeliveryDto));
     orderRepository.save(order);
+
+    cartService.clear(sessionId);
+    sendOrderConfirmationAndNotification(order);
+  }
+
+  private void sendOrderConfirmationAndNotification(Order order) {
+    Currency currency = order.getItems().get(0).getSku().getProduct().getPrice().getCurrency();
+
+    String message = order.getItems().stream()
+        .reduce(
+            """
+                Замовлення №%s
+                Статус: %s
+                Дякуємо за ваше замовлення в інтернет магазині ZATYSHNA
+                                
+                """
+                .formatted(order.getId(), "Прийняте в обробку"),
+            (s, orderItem) -> s + "\n   -"
+                + orderItem.getSku().getProduct().getTitle()
+                + "(" + skuCharacteristicsToString(orderItem.getSku()) + ")"
+                + "\tціна: "
+                + orderItem.getPrice()
+                + currency.getCode()
+                + "\tкількість: "
+                + orderItem.getQuantity()
+                + "\tсума: "
+                + orderItem.getAmount()
+                + currency.getCode(),
+            String::concat);
+    message = message + """
+                
+        ДОСТАВКА: за тарифами перевізника
+        ЗАГАЛОМ: %s %s
+                
+        Дані отримувача:
+        %s %s, %s
+        %s
+        Спосіб оплати: %s
+        """.formatted(order.getItems().stream()
+            .map(OrderItem::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add),
+        currency.getCode(),
+        order.getDelivery().getFirstName(),
+        order.getDelivery().getLastName(),
+        order.getDelivery().getCustomerPhoneNumber(),
+        order.getDelivery().getAddress(),
+        "при отриманні");
+    emailService.sendEmail(
+        order.getDelivery().getEmail(),
+        "Підтвердження Замовлення №%s".formatted(order.getId()),
+        message);
+  }
+
+  private String skuCharacteristicsToString(SKU sku) {
+    return sku.getCharacteristics().stream()
+        .reduce(
+            "",
+            (s, skuCharacteristic) -> s + (s.equals("") ? "" : ", ")
+                + skuCharacteristic.getCharacteristic().getTitle() + ": "
+                + skuCharacteristic.getValue(),
+            String::concat);
   }
 
   public Order changeOrderStatus(Long orderId, OrderStatus status) {
