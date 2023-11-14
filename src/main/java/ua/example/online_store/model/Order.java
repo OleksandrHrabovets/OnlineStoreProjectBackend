@@ -25,7 +25,7 @@ import ua.example.online_store.model.enums.OrderStatus;
 @Data
 @Entity
 @Table(name = "orders")
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"id"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

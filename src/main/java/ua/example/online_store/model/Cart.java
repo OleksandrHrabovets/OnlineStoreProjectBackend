@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"id"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
