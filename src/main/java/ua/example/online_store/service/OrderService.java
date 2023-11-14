@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
@@ -31,6 +32,9 @@ public class OrderService {
   private final OrderDeliveryService orderDeliveryService;
 
   private final EmailService emailService;
+
+  @Value("${app.email-sales-manager}")
+  private String emailSalesManager;
 
   public List<Order> getAll() {
     log.info(INVOKED_METHOD, "getAll()");
@@ -75,6 +79,7 @@ public class OrderService {
 
     cartService.clear(sessionId);
     sendOrderConfirmationAndNotification(order);
+    sendOrderMessageToSalesManager(order);
   }
 
   private void sendOrderConfirmationAndNotification(Order order) {
@@ -124,6 +129,56 @@ public class OrderService {
         "Підтвердження Замовлення №%s".formatted(order.getId()),
         message);
   }
+
+  private void sendOrderMessageToSalesManager(Order order) {
+    Currency currency = order.getItems().get(0).getSku().getProduct().getPrice().getCurrency();
+
+    String message = order.getItems().stream()
+        .reduce(
+            """
+                Замовлення №%s
+                Статус: %s
+                                
+                Дані замовлення:
+                """
+                .formatted(order.getId(), order.getStatus()),
+            (s, orderItem) -> s + "\n   -"
+                + orderItem.getSku().getProduct().getTitle()
+                + "(" + skuCharacteristicsToString(orderItem.getSku()) + ")"
+                + "\tціна: "
+                + orderItem.getPrice()
+                + currency.getCode()
+                + "\tкількість: "
+                + orderItem.getQuantity()
+                + "\tсума: "
+                + orderItem.getAmount()
+                + currency.getCode(),
+            String::concat);
+    message = message + """
+                
+        Загальна сума\s: %s %s
+                
+        Дані доставки:
+        Ім’я: \t%s
+        Прізвище: \t%s
+        Номер телефону: \t%s
+        Адреса доставки: \t%s
+        Спосіб оплати: %s
+        """.formatted(order.getItems().stream()
+            .map(OrderItem::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add),
+        currency.getCode(),
+        order.getDelivery().getFirstName(),
+        order.getDelivery().getLastName(),
+        order.getDelivery().getCustomerPhoneNumber(),
+        order.getDelivery().getAddress(),
+        "Післяплата");
+    emailService.sendEmail(
+        emailSalesManager,
+        "Деталі Замовлення №%s".formatted(order.getId()),
+        message);
+  }
+
 
   private String skuCharacteristicsToString(SKU sku) {
     return sku.getCharacteristics().stream()
