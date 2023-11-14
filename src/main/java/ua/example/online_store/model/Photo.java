@@ -17,7 +17,7 @@ import ua.example.online_store.model.enums.Color;
 
 @Data
 @Entity
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"id"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
