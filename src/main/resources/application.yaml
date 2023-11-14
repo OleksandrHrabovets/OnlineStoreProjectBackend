@@ -53,4 +53,4 @@ app:
     time:
       cron: 0 0 9 * * *
       zone: Europe/Kiev
-  email-sales-manager: salesmanager545@gmail.com
+  email-sales-manager: salesmanager622@gmail.com
