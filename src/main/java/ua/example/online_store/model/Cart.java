@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Data
 @Entity
@@ -37,6 +39,7 @@ public class Cart {
   @Digits(integer = 12, fraction = 2)
   private BigDecimal totalAmount;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = CartItem.class, mappedBy = "cart")
+  @Fetch(FetchMode.SUBSELECT)
   private List<CartItem> items;
 
   public BigDecimal getTotalQuantity() {

@@ -15,6 +15,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Data
 @Entity
@@ -35,8 +37,10 @@ public class Product {
   private Category category;
   private boolean status;
   @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @Fetch(FetchMode.SUBSELECT)
   private List<SKU> skuSet;
   @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Photo> photos;
 
 }

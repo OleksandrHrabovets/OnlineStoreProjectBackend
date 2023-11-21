@@ -20,6 +20,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import ua.example.online_store.model.enums.OrderStatus;
 
 @Data
@@ -47,6 +49,7 @@ public class Order {
   @OneToOne(targetEntity = OrderDelivery.class)
   private OrderDelivery delivery;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = OrderItem.class, mappedBy = "order")
+  @Fetch(FetchMode.SUBSELECT)
   private List<OrderItem> items;
 
   public BigDecimal getTotalQuantity() {

@@ -18,6 +18,8 @@ import ua.example.online_store.service.email.EmailService;
 public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterface {
 
   public static final long ID = 1L;
+  public static final String BASE_TITLE = "Нові товари в нашому магазині";
+  public static final String BASE_MESSAGE = "Нові товари в нашому магазині:";
   private final SubscriptionService subscriptionService;
   private final SubscriberService subscriberService;
   private final SKUService skuService;
@@ -47,18 +49,21 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
 
     List<String> subscribers = subscriberService.findAllBySubscriptionId(ID).stream()
         .map(Subscriber::getEmail).toList();
-    final String title = "Нові товари в нашому магазині";
     final String message = skuToString();
-    subscribers.forEach(
-        email -> emailService.sendEmail(email, title, message)
-    );
-    log.info("Notify subscribers successfully");
+    if (!BASE_MESSAGE.equals(message)) {
+      subscribers.forEach(
+          email -> emailService.sendEmail(email, BASE_TITLE, message)
+      );
+      log.info("Notify subscribers successfully");
+    } else {
+      log.info("There are no new SKU for subscribers notify");
+    }
   }
 
   private String skuToString() {
     return skuService.findAllByStatus(true).stream()
         .reduce(
-            "Нові товари в нашому магазині:",
+            BASE_MESSAGE,
             (s, sku) -> s + "\n   -"
                 + sku.getProduct().getTitle() + "(" + skuCharacteristicsToString(sku) + ") - ціна "
                 + sku.getProduct().getPrice().getValue()
