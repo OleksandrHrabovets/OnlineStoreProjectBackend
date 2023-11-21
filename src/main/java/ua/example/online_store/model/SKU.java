@@ -14,6 +14,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Data
 @Entity
@@ -30,6 +32,7 @@ public class SKU {
   @JoinColumn(name = "product_id", referencedColumnName = "id")
   private Product product;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = SKUCharacteristic.class, mappedBy = "sku")
+  @Fetch(FetchMode.SUBSELECT)
   private List<SKUCharacteristic> characteristics;
   private boolean status;
 
