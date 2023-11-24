@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,9 @@ public class ProductService {
   private final SKUMapper skuMapper;
   private final PhotoMapper photoMapper;
   private final PhotoService photoService;
+
+  @Value("${app.product.price-delta-for-similar-products}")
+  private double priceDelta;
 
   public Optional<Product> getProduct(Long id) {
     log.info(INVOKED_METHOD, "getProduct()");
@@ -92,6 +96,10 @@ public class ProductService {
         -> criteriaBuilder.greaterThan(root.get("price").get("value"), price);
   }
 
+  private Specification<Product> priceLessThanSpecification(double price) {
+    return (root, query, criteriaBuilder)
+        -> criteriaBuilder.lessThan(root.get("price").get("value"), price);
+  }
 
   public Page<Product> getSimilarProducts(Pageable pageable, Long id) {
     log.info(INVOKED_METHOD, "getAll()");
@@ -100,8 +108,10 @@ public class ProductService {
     Product product = productRepository.findById(id).orElseThrow();
     specification = where(categorySpecification(product.getCategory())).and(specification);
     specification = where(notEqualIdSpecification(id)).and(specification);
-    specification = where(priceGreaterThanSpecification(product.getPrice().getValue())).and(
-        specification);
+    specification = where(priceGreaterThanSpecification(product.getPrice().getValue() - priceDelta))
+        .and(specification);
+    specification = where(priceLessThanSpecification(product.getPrice().getValue() + priceDelta))
+        .and(specification);
     return productRepository.findAll(specification, pageable);
 
   }

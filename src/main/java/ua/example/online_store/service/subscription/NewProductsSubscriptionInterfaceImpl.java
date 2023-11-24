@@ -1,12 +1,12 @@
 package ua.example.online_store.service.subscription;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
-import ua.example.online_store.model.SKU;
 import ua.example.online_store.model.subscription.Subscriber;
 import ua.example.online_store.model.subscription.Subscription;
 import ua.example.online_store.service.SKUService;
@@ -61,23 +61,14 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
   }
 
   private String skuToString() {
-    return skuService.findAllByStatus(true).stream()
+    return skuService.findAllCreatedIsAfter(LocalDateTime.now().minusDays(1)).stream()
         .reduce(
             BASE_MESSAGE,
             (s, sku) -> s + "\n   -"
-                + sku.getProduct().getTitle() + "(" + skuCharacteristicsToString(sku) + ") - ціна "
+                + sku.getProduct().getTitle() + "(" +
+                skuService.skuCharacteristicsToString(sku) + ") - ціна "
                 + sku.getProduct().getPrice().getValue()
                 + sku.getProduct().getPrice().getCurrency().getCode(),
-            String::concat);
-  }
-
-  private String skuCharacteristicsToString(SKU sku) {
-    return sku.getCharacteristics().stream()
-        .reduce(
-            "",
-            (s, skuCharacteristic) -> s + (s.equals("") ? "" : ", ")
-                + skuCharacteristic.getCharacteristic().getTitle() + ": "
-                + skuCharacteristic.getValue(),
             String::concat);
   }
 
