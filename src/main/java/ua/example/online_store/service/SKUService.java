@@ -1,5 +1,6 @@
 package ua.example.online_store.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +27,27 @@ public class SKUService {
   }
 
   public List<SKU> findAllByStatus(boolean status) {
-    log.info(INVOKED_METHOD, "getAll()");
+    log.info(INVOKED_METHOD, "findAllByStatus()");
     return skuRepository.findAllByStatus(status);
+  }
+
+  public List<SKU> findAllCreatedIsAfter(LocalDateTime dateTime) {
+    log.info(INVOKED_METHOD, "findAllCreatedIsAfter()");
+    return skuRepository.findAllByCreatedAtIsAfter(dateTime);
   }
 
   public List<SKU> saveAll(List<SKU> skuSet) {
     log.info(INVOKED_METHOD, "saveAll()");
     return skuRepository.saveAll(skuSet);
+  }
+
+  public String skuCharacteristicsToString(SKU sku) {
+    return sku.getCharacteristics().stream()
+        .reduce(
+            "",
+            (s, skuCharacteristic) -> s + (s.equals("") ? "" : ", ")
+                + skuCharacteristic.getCharacteristic().getTitle() + ": "
+                + skuCharacteristic.getValue(),
+            String::concat);
   }
 }

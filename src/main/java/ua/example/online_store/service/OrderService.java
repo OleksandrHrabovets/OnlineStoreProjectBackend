@@ -13,7 +13,6 @@ import ua.example.online_store.model.Cart;
 import ua.example.online_store.model.Currency;
 import ua.example.online_store.model.Order;
 import ua.example.online_store.model.OrderItem;
-import ua.example.online_store.model.SKU;
 import ua.example.online_store.model.enums.OrderStatus;
 import ua.example.online_store.repository.OrderItemRepository;
 import ua.example.online_store.repository.OrderRepository;
@@ -30,7 +29,7 @@ public class OrderService {
   private final OrderItemRepository orderItemRepository;
   private final CartService cartService;
   private final OrderDeliveryService orderDeliveryService;
-
+  private final SKUService skuService;
   private final EmailService emailService;
 
   @Value("${app.email-sales-manager}")
@@ -96,7 +95,7 @@ public class OrderService {
                 .formatted(order.getId(), "Прийняте в обробку"),
             (s, orderItem) -> s + "\n   -"
                 + orderItem.getSku().getProduct().getTitle()
-                + "(" + skuCharacteristicsToString(orderItem.getSku()) + ")"
+                + "(" + skuService.skuCharacteristicsToString(orderItem.getSku()) + ")"
                 + "\tціна: "
                 + orderItem.getPrice()
                 + currency.getCode()
@@ -144,7 +143,7 @@ public class OrderService {
                 .formatted(order.getId(), order.getStatus()),
             (s, orderItem) -> s + "\n   -"
                 + orderItem.getSku().getProduct().getTitle()
-                + "(" + skuCharacteristicsToString(orderItem.getSku()) + ")"
+                + "(" + skuService.skuCharacteristicsToString(orderItem.getSku()) + ")"
                 + "\tціна: "
                 + orderItem.getPrice()
                 + currency.getCode()
@@ -177,17 +176,6 @@ public class OrderService {
         emailSalesManager,
         "Деталі Замовлення №%s".formatted(order.getId()),
         message);
-  }
-
-
-  private String skuCharacteristicsToString(SKU sku) {
-    return sku.getCharacteristics().stream()
-        .reduce(
-            "",
-            (s, skuCharacteristic) -> s + (s.equals("") ? "" : ", ")
-                + skuCharacteristic.getCharacteristic().getTitle() + ": "
-                + skuCharacteristic.getValue(),
-            String::concat);
   }
 
   public Order changeOrderStatus(Long orderId, OrderStatus status) {

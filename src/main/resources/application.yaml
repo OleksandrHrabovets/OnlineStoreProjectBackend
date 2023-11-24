@@ -46,6 +46,8 @@ logging:
   level:
     root: INFO
 app:
+  product:
+    price-delta-for-similar-products: 300.0
   security:
     admin-password: ${ADMIN_PASSWORD}
     user-password: ${USER_PASSWORD}
