@@ -33,6 +33,7 @@ public class Product {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   private String title;
+  @Column(name = "description", columnDefinition = "TEXT")
   private String description;
   @OneToOne(targetEntity = Price.class)
   private Price price;
