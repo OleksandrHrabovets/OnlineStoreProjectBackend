@@ -33,10 +33,10 @@ public class Cart {
   @Column(unique = true, nullable = false)
   private String sessionId;
   @Transient
-  @Digits(integer = 12, fraction = 3)
+  @Digits(integer = 12, fraction = 0)
   private BigDecimal totalQuantity;
   @Transient
-  @Digits(integer = 12, fraction = 2)
+  @Digits(integer = 12, fraction = 0)
   private BigDecimal totalAmount;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = CartItem.class, mappedBy = "cart")
   @Fetch(FetchMode.SUBSELECT)

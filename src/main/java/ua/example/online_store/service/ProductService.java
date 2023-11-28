@@ -108,10 +108,10 @@ public class ProductService {
     Product product = productRepository.findById(id).orElseThrow();
     specification = where(categorySpecification(product.getCategory())).and(specification);
     specification = where(notEqualIdSpecification(id)).and(specification);
-    specification = where(priceGreaterThanSpecification(product.getPrice().getValue() - priceDelta))
-        .and(specification);
-    specification = where(priceLessThanSpecification(product.getPrice().getValue() + priceDelta))
-        .and(specification);
+    specification = where(priceGreaterThanSpecification(product.getPrice().getValue().doubleValue()
+        - priceDelta)).and(specification);
+    specification = where(priceLessThanSpecification(product.getPrice().getValue().doubleValue()
+        + priceDelta)).and(specification);
     return productRepository.findAll(specification, pageable);
 
   }

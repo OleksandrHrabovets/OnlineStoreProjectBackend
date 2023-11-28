@@ -29,11 +29,11 @@ public class CartItem {
   private Cart cart;
   @OneToOne
   private SKU sku;
-  @Digits(integer = 12, fraction = 2)
+  @Digits(integer = 12, fraction = 0)
   private BigDecimal price;
-  @Digits(integer = 12, fraction = 3)
+  @Digits(integer = 12, fraction = 0)
   private BigDecimal quantity;
-  @Digits(integer = 12, fraction = 2)
+  @Digits(integer = 12, fraction = 0)
   private BigDecimal amount;
 
 }
