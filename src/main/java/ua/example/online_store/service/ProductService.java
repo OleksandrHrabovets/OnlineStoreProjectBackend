@@ -2,6 +2,7 @@ package ua.example.online_store.service;
 
 import static org.springframework.data.jpa.domain.Specification.where;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -91,12 +92,12 @@ public class ProductService {
         -> criteriaBuilder.notEqual(root.get("id"), id);
   }
 
-  private Specification<Product> priceGreaterThanSpecification(double price) {
+  private Specification<Product> priceGreaterThanSpecification(BigDecimal price) {
     return (root, query, criteriaBuilder)
         -> criteriaBuilder.greaterThan(root.get("price").get("value"), price);
   }
 
-  private Specification<Product> priceLessThanSpecification(double price) {
+  private Specification<Product> priceLessThanSpecification(BigDecimal price) {
     return (root, query, criteriaBuilder)
         -> criteriaBuilder.lessThan(root.get("price").get("value"), price);
   }
@@ -108,10 +109,12 @@ public class ProductService {
     Product product = productRepository.findById(id).orElseThrow();
     specification = where(categorySpecification(product.getCategory())).and(specification);
     specification = where(notEqualIdSpecification(id)).and(specification);
-    specification = where(priceGreaterThanSpecification(product.getPrice().getValue().doubleValue()
-        - priceDelta)).and(specification);
-    specification = where(priceLessThanSpecification(product.getPrice().getValue().doubleValue()
-        + priceDelta)).and(specification);
+    specification = where(
+        priceGreaterThanSpecification(BigDecimal.valueOf(product.getPrice().getValue().doubleValue()
+            - priceDelta))).and(specification);
+    specification = where(
+        priceLessThanSpecification(BigDecimal.valueOf(product.getPrice().getValue().doubleValue()
+            + priceDelta))).and(specification);
     return productRepository.findAll(specification, pageable);
 
   }
