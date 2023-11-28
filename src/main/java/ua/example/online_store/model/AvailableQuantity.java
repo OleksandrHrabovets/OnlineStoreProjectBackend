@@ -26,7 +26,7 @@ public class AvailableQuantity {
   private Long id;
   @OneToOne(targetEntity = SKU.class)
   private SKU sku;
-  @Digits(integer = 12, fraction = 3)
+  @Digits(integer = 12, fraction = 0)
   private BigDecimal quantity;
 
 }
