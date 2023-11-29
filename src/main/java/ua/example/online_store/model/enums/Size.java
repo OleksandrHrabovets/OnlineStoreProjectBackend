@@ -26,7 +26,8 @@ public enum Size {
     return Arrays.stream(values())
         .filter(v -> v.getValue().equalsIgnoreCase(value))
         .findAny()
-        .orElseThrow(IllegalArgumentException::new);
+        .orElseThrow(() -> new IllegalArgumentException(
+            "Can not map value of skuCharacteristic %s".formatted(value)));
   }
 
 }

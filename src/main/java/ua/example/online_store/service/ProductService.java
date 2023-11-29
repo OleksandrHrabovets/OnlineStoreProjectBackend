@@ -163,9 +163,9 @@ public class ProductService {
   }
 
   public String mapValueOfSkuCharacteristic(SKUCharacteristic skuCharacteristic) {
-    if (skuCharacteristic.getId() == 2L) {
+    if (skuCharacteristic.getCharacteristic().getTitle().equals("color")) {
       return Color.getColor(skuCharacteristic.getValue()).name();
-    } else if (skuCharacteristic.getId() == 1L) {
+    } else if (skuCharacteristic.getCharacteristic().getTitle().equals("size")) {
       return Size.getSize(skuCharacteristic.getValue()).name();
     } else {
       throw new IllegalArgumentException(
