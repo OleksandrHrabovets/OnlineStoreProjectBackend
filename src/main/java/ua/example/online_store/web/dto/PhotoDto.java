@@ -11,7 +11,14 @@ public class PhotoDto {
 
   private Long id;
   private Color color;
+  private String colorValue;
   @NotBlank
   private String url;
 
+  public String getColorValue() {
+    if (color == null) {
+      return "";
+    }
+    return color.getValue();
+  }
 }
