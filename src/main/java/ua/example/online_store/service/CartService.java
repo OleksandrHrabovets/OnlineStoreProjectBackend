@@ -25,6 +25,7 @@ public class CartService {
   private final CartRepository cartRepository;
   private final CartItemRepository cartItemRepository;
   private final SKUService skuService;
+  private final AvailableQuantityService availableQuantityService;
 
   public List<Cart> getAll() {
     log.info(INVOKED_METHOD, "getAll()");
@@ -46,6 +47,9 @@ public class CartService {
             .build());
     SKU sku = skuService.findById(cartAddItemDto.getSkuId())
         .orElseThrow(() -> new NotFoundException("SKU not found"));
+
+    validate(cartAddItemDto, sku);
+
     CartItem cartItem = cart.getItems().stream()
         .filter(item -> item.getSku().equals(sku)).findFirst().orElse(
             CartItem.builder()
@@ -60,6 +64,19 @@ public class CartService {
     cartItem.setAmount(cartItem.getAmount().add(cartAddItemDto.getAmount()));
     cartItemRepository.save(cartItem);
     return cartRepository.save(cart);
+  }
+
+  private void validate(CartAddItemDto cartAddItemDto, SKU sku) {
+    availableQuantityService.checkAvailableQuantity(sku, cartAddItemDto.getQuantity());
+    BigDecimal productPrice = sku.getProduct().getPrice().getValue();
+    if (productPrice.compareTo(cartAddItemDto.getPrice()) != 0) {
+      throw new IllegalArgumentException("Price %s does not correspond to the product price %s"
+          .formatted(cartAddItemDto.getPrice(), productPrice));
+    }
+    if (cartAddItemDto.getQuantity().multiply(cartAddItemDto.getPrice())
+        .compareTo(cartAddItemDto.getAmount()) != 0) {
+      throw new IllegalArgumentException("Amount does not correspond to the quantity and price");
+    }
   }
 
   public void delete(String sessionId, Long skuId) {
