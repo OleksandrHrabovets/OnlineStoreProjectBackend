@@ -58,18 +58,27 @@ public class AvailableQuantityService {
 
   @Transactional
   public void reduceAvailableQuantity(SKU sku, BigDecimal quantity) {
-    AvailableQuantity availableQuantity = availableQuantityRepository.findBySkuId(sku.getId())
+    AvailableQuantity availableQuantity = checkAvailableQuantity(sku, quantity);
+    availableQuantity.setQuantity(availableQuantity.getQuantity().subtract(quantity));
+    availableQuantityRepository.save(availableQuantity);
+    availableQuantityLogService.addToLog(availableQuantity);
+  }
+
+  private AvailableQuantity getAvailableQuantity(SKU sku) {
+    return availableQuantityRepository.findBySkuId(sku.getId())
         .orElse(AvailableQuantity.builder()
             .sku(sku)
             .quantity(BigDecimal.ZERO)
             .build());
+  }
+
+  public AvailableQuantity checkAvailableQuantity(SKU sku, BigDecimal quantity) {
+    AvailableQuantity availableQuantity = getAvailableQuantity(sku);
     if (quantity.compareTo(availableQuantity.getQuantity()) > 0) {
       throw new IllegalArgumentException(("Insufficient of SKU id %s. Available quantity is %s, "
           + "but you need %s")
           .formatted(sku.getId(), availableQuantity.getQuantity(), quantity));
     }
-    availableQuantity.setQuantity(availableQuantity.getQuantity().subtract(quantity));
-    availableQuantityRepository.save(availableQuantity);
-    availableQuantityLogService.addToLog(availableQuantity);
+    return availableQuantity;
   }
 }
