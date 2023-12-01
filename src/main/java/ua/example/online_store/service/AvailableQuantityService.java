@@ -1,5 +1,6 @@
 package ua.example.online_store.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class AvailableQuantityService {
 
   private final AvailableQuantityRepository availableQuantityRepository;
   private final SKUService skuService;
+  private final AvailableQuantityLogService availableQuantityLogService;
 
   public List<AvailableQuantity> getAll() {
 
@@ -54,4 +56,20 @@ public class AvailableQuantityService {
 
   }
 
+  @Transactional
+  public void reduceAvailableQuantity(SKU sku, BigDecimal quantity) {
+    AvailableQuantity availableQuantity = availableQuantityRepository.findBySkuId(sku.getId())
+        .orElse(AvailableQuantity.builder()
+            .sku(sku)
+            .quantity(BigDecimal.ZERO)
+            .build());
+    if (quantity.compareTo(availableQuantity.getQuantity()) > 0) {
+      throw new IllegalArgumentException(("Insufficient of SKU id %s. Available quantity is %s, "
+          + "but you need %s")
+          .formatted(sku.getId(), availableQuantity.getQuantity(), quantity));
+    }
+    availableQuantity.setQuantity(availableQuantity.getQuantity().subtract(quantity));
+    availableQuantityRepository.save(availableQuantity);
+    availableQuantityLogService.addToLog(availableQuantity);
+  }
 }

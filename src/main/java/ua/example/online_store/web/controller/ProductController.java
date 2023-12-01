@@ -2,6 +2,7 @@ package ua.example.online_store.web.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.webjars.NotFoundException;
+import ua.example.online_store.model.AvailableQuantity;
+import ua.example.online_store.service.AvailableQuantityService;
 import ua.example.online_store.service.ProductService;
 import ua.example.online_store.web.dto.ProductDto;
 import ua.example.online_store.web.mapper.ProductMapper;
@@ -31,6 +34,7 @@ public class ProductController {
 
   public static final String INVOKED_METHOD = "invoked method {}";
   private final ProductService productService;
+  private final AvailableQuantityService availableQuantityService;
   private final ProductMapper productMapper;
 
   @GetMapping
@@ -39,15 +43,28 @@ public class ProductController {
       @RequestParam(value = "title", required = false) String title,
       @RequestParam(value = "categoryId", required = false) Long categoryId) {
     log.info(INVOKED_METHOD, "getAll()");
-    return ResponseEntity.ok(productService.getAll(pageable, title, categoryId)
-        .map(productMapper::toDto));
+    Page<ProductDto> productDtos = productService.getAll(pageable, title, categoryId)
+        .map(productMapper::toDto);
+    productDtos.forEach(this::setAvailableQuantity);
+    return ResponseEntity.ok(productDtos);
+  }
+
+  private void setAvailableQuantity(ProductDto productDto) {
+    productDto.getSkuSet().forEach(skuDto ->
+        skuDto.setAvailableQuantity(availableQuantityService.findBySkuId(skuDto.getId())
+            .orElse(AvailableQuantity.builder()
+                .quantity(BigDecimal.ZERO)
+                .build()).getQuantity())
+    );
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<ProductDto> getProduct(@PathVariable Long id) {
     log.info(INVOKED_METHOD, "getProduct()");
-    return ResponseEntity.ok(productMapper.toDto(productService.getProduct(id)
-        .orElseThrow(() -> new NotFoundException("Product not found"))));
+    ProductDto productDto = productMapper.toDto(productService.getProduct(id)
+        .orElseThrow(() -> new NotFoundException("Product not found")));
+    setAvailableQuantity(productDto);
+    return ResponseEntity.ok(productDto);
   }
 
   @GetMapping("/similar_products/{id}")
