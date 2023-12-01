@@ -30,6 +30,7 @@ public class OrderService {
   private final CartService cartService;
   private final OrderDeliveryService orderDeliveryService;
   private final SKUService skuService;
+  private final AvailableQuantityService availableQuantityService;
   private final EmailService emailService;
 
   @Value("${app.email-sales-manager}")
@@ -51,6 +52,10 @@ public class OrderService {
 
     Cart cart = cartService.getBySessionId(sessionId)
         .orElseThrow(() -> new NotFoundException("Cart not found"));
+
+    cart.getItems().forEach(cartItem ->
+        availableQuantityService.reduceAvailableQuantity(cartItem.getSku(),
+            cartItem.getQuantity()));
 
     Order order = Order.builder()
         .sessionId(sessionId)
