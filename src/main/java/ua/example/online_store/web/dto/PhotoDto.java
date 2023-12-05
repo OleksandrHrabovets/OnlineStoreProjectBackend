@@ -10,7 +10,9 @@ import ua.example.online_store.model.enums.Color;
 public class PhotoDto {
 
   private Long id;
+  @NotBlank
   private Color color;
+  @NotBlank
   private String colorValue;
   @NotBlank
   private String url;

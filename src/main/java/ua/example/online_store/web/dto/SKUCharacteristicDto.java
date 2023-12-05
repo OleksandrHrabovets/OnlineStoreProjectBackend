@@ -16,23 +16,23 @@ public class SKUCharacteristicDto {
   private CharacteristicDto characteristic;
   @NotBlank
   private String value;
-
+  @NotBlank
   private String name;
 
   public String getValue() {
     if (characteristic.getTitle().equals("color")) {
-      return Color.valueOf(value).getValue();
+      return Color.valueOf(name).getValue();
     } else if (characteristic.getTitle().equals("size")) {
-      return Size.valueOf(value).getValue();
+      return Size.valueOf(name).getValue();
     }
     return value;
   }
 
   public String getName() {
     if (characteristic.getTitle().equals("color")) {
-      return Color.valueOf(value).name();
+      return Color.valueOf(name).name();
     } else if (characteristic.getTitle().equals("size")) {
-      return Size.valueOf(value).name();
+      return Size.valueOf(name).name();
     }
     return value;
   }
