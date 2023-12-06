@@ -47,7 +47,7 @@ public class OrderService {
   }
 
   @Transactional
-  public void makeOrder(String sessionId, OrderDeliveryDto orderDeliveryDto) {
+  public Order makeOrder(String sessionId, OrderDeliveryDto orderDeliveryDto) {
     log.info(INVOKED_METHOD, "makeOrder()");
 
     Cart cart = cartService.getBySessionId(sessionId)
@@ -84,6 +84,7 @@ public class OrderService {
     cartService.clear(sessionId);
     sendOrderConfirmationAndNotification(order);
     sendOrderMessageToSalesManager(order);
+    return order;
   }
 
   private void sendOrderConfirmationAndNotification(Order order) {

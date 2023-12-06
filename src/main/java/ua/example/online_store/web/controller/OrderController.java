@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ua.example.online_store.model.enums.OrderStatus;
 import ua.example.online_store.service.OrderService;
@@ -32,12 +31,12 @@ public class OrderController {
   private final OrderMapper orderMapper;
 
   @PostMapping
-  @ResponseStatus(HttpStatus.OK)
-  public void makeOrder(@RequestParam String sessionId,
+  public ResponseEntity<OrderDto> makeOrder(@RequestParam String sessionId,
       @Valid @RequestBody OrderDeliveryDto orderDeliveryDto) {
 
     log.info(INVOKED_METHOD, "makeOrder()");
-    orderService.makeOrder(sessionId, orderDeliveryDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(
+        orderMapper.toDto(orderService.makeOrder(sessionId, orderDeliveryDto)));
 
   }
 

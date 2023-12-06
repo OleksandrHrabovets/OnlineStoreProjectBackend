@@ -12,6 +12,7 @@ public class OrderDeliveryDto {
 
   private Long id;
   @NotNull
+  @NotBlank
   @Email
   private String email;
   @NotBlank
