@@ -14,6 +14,7 @@ public class AvailableQuantityDto {
   private Long id;
   @NotNull
   private SKUDto sku;
+  @NotNull
   @Min(0)
   @Max(1000)
   private BigDecimal quantity;
