@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,7 +63,7 @@ public class CategoryController {
   public ResponseEntity<CategoryDto> addCategory(
       @Valid @RequestBody CategoryDto categoryDto) {
     log.info(INVOKED_METHOD, "addCategory()");
-    return ResponseEntity.ok(categoryMapper.toDto(
+    return ResponseEntity.status(HttpStatus.CREATED).body(categoryMapper.toDto(
         categoryService.addCategory(categoryDto)));
   }
 

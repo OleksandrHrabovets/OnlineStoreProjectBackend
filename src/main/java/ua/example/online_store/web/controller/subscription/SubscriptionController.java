@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.webjars.NotFoundException;
 import ua.example.online_store.model.subscription.Subscriber;
 import ua.example.online_store.model.subscription.Subscription;
 import ua.example.online_store.service.subscription.SubscriberService;
 import ua.example.online_store.service.subscription.SubscriptionService;
+import ua.example.online_store.web.dto.ApiMessage;
 import ua.example.online_store.web.dto.subscription.SubscriberDto;
 
 @Slf4j
@@ -46,17 +46,17 @@ public class SubscriptionController {
                 .orElseThrow(() -> new NotFoundException("subscription not found")))
             .email(subscriberDto.getEmail())
             .build());
-    return ResponseEntity.ok(subscriberService.save(subscriber));
+    return ResponseEntity.status(HttpStatus.CREATED).body(subscriberService.save(subscriber));
   }
 
   @DeleteMapping
-  @ResponseStatus(HttpStatus.OK)
-  public void unsubscribe(@Valid @RequestBody SubscriberDto subscriberDto) {
+  public ResponseEntity<ApiMessage> unsubscribe(@Valid @RequestBody SubscriberDto subscriberDto) {
     log.info(INVOKED_METHOD, "unsubscribe()");
     Subscriber subscriber = subscriberService.findAllBySubscriptionIdAndEmail(
             subscriberDto.getSubscriptionId(), subscriberDto.getEmail())
         .orElseThrow(() -> new NotFoundException("subscriber not found"));
     subscriberService.delete(subscriber);
+    return ResponseEntity.ok(new ApiMessage(HttpStatus.OK, "Subscriber deleted successful"));
   }
 
 

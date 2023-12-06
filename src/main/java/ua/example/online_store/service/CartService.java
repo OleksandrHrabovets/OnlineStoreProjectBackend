@@ -38,7 +38,7 @@ public class CartService {
   }
 
   @Transactional
-  public Cart add(CartAddItemDto cartAddItemDto) {
+  public CartItem add(CartAddItemDto cartAddItemDto) {
     log.info(INVOKED_METHOD, "add()");
     Cart cart = cartRepository.findBySessionId(cartAddItemDto.getSessionId())
         .orElse(Cart.builder()
@@ -63,7 +63,8 @@ public class CartService {
     cartItem.setQuantity(cartItem.getQuantity().add(cartAddItemDto.getQuantity()));
     cartItem.setAmount(cartItem.getAmount().add(cartAddItemDto.getAmount()));
     cartItemRepository.save(cartItem);
-    return cartRepository.save(cart);
+    cartRepository.save(cart);
+    return cartItem;
   }
 
   private void validate(CartAddItemDto cartAddItemDto, SKU sku) {

@@ -2,6 +2,7 @@ package ua.example.online_store.web.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import lombok.Data;
 public class OrderDeliveryDto {
 
   private Long id;
+  @NotNull
   @Email
   private String email;
   @NotBlank

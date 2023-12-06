@@ -11,6 +11,7 @@ public class SubscriberDto {
 
   @NotNull
   private Long subscriptionId;
+  @NotNull
   @Email
   private String email;
 

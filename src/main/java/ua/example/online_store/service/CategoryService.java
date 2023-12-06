@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ua.example.online_store.model.Category;
+import ua.example.online_store.model.exception.ConflictException;
 import ua.example.online_store.repository.CategoryRepository;
 import ua.example.online_store.web.dto.CategoryDto;
 
@@ -50,6 +51,9 @@ public class CategoryService {
 
   public Category addCategory(CategoryDto categoryDto) {
     log.info(INVOKED_METHOD, "addCategory()");
+    if (categoryRepository.findByTitle(categoryDto.getTitle()).isPresent()) {
+      throw new ConflictException("Category already exists");
+    }
     Category category = categoryRepository.findById(categoryDto.getId())
         .orElse(Category.builder()
             .build());

@@ -2,6 +2,7 @@ package ua.example.online_store.web.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import lombok.Data;
 public class AvailableQuantityDto {
 
   private Long id;
+  @NotNull
   private SKUDto sku;
   @Min(0)
   @Max(1000)
