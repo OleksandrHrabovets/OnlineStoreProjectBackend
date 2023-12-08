@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
@@ -24,6 +25,9 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
   private final SubscriberService subscriberService;
   private final SKUService skuService;
   private final EmailService emailService;
+
+  @Value("${app.front.url}")
+  private String frontUrl;
 
   @Override
   public void subscribe(String email) {
@@ -52,7 +56,8 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
     final String message = skuToString();
     if (!BASE_MESSAGE.equals(message)) {
       subscribers.forEach(
-          email -> emailService.sendEmail(email, BASE_TITLE, message)
+          email -> emailService.sendEmail(email, BASE_TITLE, message
+              + footerText(email))
       );
       log.info("Notify subscribers successfully");
     } else {
@@ -70,6 +75,13 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
                 + sku.getProduct().getPrice().getValue()
                 + sku.getProduct().getPrice().getCurrency().getCode(),
             String::concat);
+  }
+
+  private String footerText(String email) {
+    return """
+                
+        Відписатись від новин можете за посиланням: %s"""
+        .formatted(frontUrl + "/unsubscribe?email=" + email);
   }
 
 }

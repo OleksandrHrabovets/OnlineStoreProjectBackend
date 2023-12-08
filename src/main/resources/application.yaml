@@ -46,6 +46,8 @@ logging:
   level:
     root: INFO
 app:
+  front:
+    url: https://olgaoo7.github.io/clothing-store-app
   product:
     price-delta-for-similar-products: 300.0
   security:
