@@ -94,20 +94,8 @@ public class OrderService {
   }
 
   private void sendOrderConfirmationAndNotification(Order order) {
-    Currency currency = order.getItems().get(0).getSku().getProduct().getPrice().getCurrency();
 
-    Context context = new Context();
-    context.setVariable("orderId", order.getId());
-    context.setVariable("orderStatus", "Прийняте в обробку");
-    context.setVariable("orderItems", getOrderItemRecords(order));
-    context.setVariable("totalAmount", order.getTotalAmount());
-    context.setVariable("currencyCode", currency.getCode());
-    context.setVariable("firstName", order.getDelivery().getFirstName());
-    context.setVariable("lastName", order.getDelivery().getLastName());
-    context.setVariable("customerPhoneNumber", order.getDelivery().getCustomerPhoneNumber());
-    context.setVariable("address", order.getDelivery().getAddress());
-
-    String message = templateEngine.process("email-order-details-customer", context);
+    String message = templateEngine.process("email-order-details-customer", getContext(order));
 
     emailService.sendEmail(
         order.getDelivery().getEmail(),
@@ -116,48 +104,9 @@ public class OrderService {
   }
 
   private void sendOrderMessageToSalesManager(Order order) {
-    Currency currency = order.getItems().get(0).getSku().getProduct().getPrice().getCurrency();
 
-    String message = order.getItems().stream()
-        .reduce(
-            """
-                Замовлення №%s
-                Статус: %s
-                                
-                Дані замовлення:
-                """
-                .formatted(order.getId(), order.getStatus()),
-            (s, orderItem) -> s + "\n   -"
-                + orderItem.getSku().getProduct().getTitle()
-                + "(" + skuService.skuCharacteristicsToString(orderItem.getSku()) + ")"
-                + "\tціна: "
-                + orderItem.getPrice()
-                + currency.getCode()
-                + "\tкількість: "
-                + orderItem.getQuantity()
-                + "\tсума: "
-                + orderItem.getAmount()
-                + currency.getCode(),
-            String::concat);
-    message = message + """
-                
-        Загальна сума\s: %s %s
-                
-        Дані доставки:
-        Ім’я: \t%s
-        Прізвище: \t%s
-        Номер телефону: \t%s
-        Адреса доставки: \t%s
-        Спосіб оплати: %s
-        """.formatted(order.getItems().stream()
-            .map(OrderItem::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add),
-        currency.getCode(),
-        order.getDelivery().getFirstName(),
-        order.getDelivery().getLastName(),
-        order.getDelivery().getCustomerPhoneNumber(),
-        order.getDelivery().getAddress(),
-        "Післяплата");
+    String message = templateEngine.process("email-order-details-manager", getContext(order));
+
     emailService.sendEmail(
         emailSalesManager,
         "Деталі Замовлення №%s".formatted(order.getId()),
@@ -169,6 +118,30 @@ public class OrderService {
         .orElseThrow(() -> new NotFoundException("Order not found"));
     order.setStatus(status);
     return orderRepository.save(order);
+  }
+
+  private Context getContext(Order order) {
+    Currency currency = order.getItems().get(0).getSku().getProduct().getPrice().getCurrency();
+
+    Context context = new Context();
+    context.setVariable("orderId", order.getId());
+    context.setVariable("orderStatus", getStatusText(order.getStatus()));
+    context.setVariable("orderItems", getOrderItemRecords(order));
+    context.setVariable("totalAmount", order.getTotalAmount());
+    context.setVariable("currencyCode", currency.getCode());
+    context.setVariable("firstName", order.getDelivery().getFirstName());
+    context.setVariable("lastName", order.getDelivery().getLastName());
+    context.setVariable("customerPhoneNumber", order.getDelivery().getCustomerPhoneNumber());
+    context.setVariable("address", order.getDelivery().getAddress());
+    return context;
+  }
+
+  private static String getStatusText(OrderStatus status) {
+    return switch (status) {
+      case NEW -> "Прийняте в обробку";
+      case PROCESSING -> "В роботі";
+      default -> "Невідомий статус";
+    };
   }
 
   public List<OrderItemRecord> getOrderItemRecords(Order order) {
