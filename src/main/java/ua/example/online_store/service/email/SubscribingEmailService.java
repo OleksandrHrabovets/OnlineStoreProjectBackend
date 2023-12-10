@@ -28,7 +28,11 @@ public class SubscribingEmailService implements EmailService {
       helper.setFrom(String.format("Online store project <%s>", sender));
       helper.setTo(email);
       helper.setSubject(title);
-      helper.setText(textMessage);
+      if (textMessage.startsWith("<!DOCTYPE html>")) {
+        helper.setText(textMessage, true);
+      } else {
+        helper.setText(textMessage);
+      }
       mailSender.send(message);
       log.info("Email to {} sent successfully", email);
     } catch (MessagingException e) {
