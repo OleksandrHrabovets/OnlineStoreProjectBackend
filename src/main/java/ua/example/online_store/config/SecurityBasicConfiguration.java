@@ -67,6 +67,8 @@ public class SecurityBasicConfiguration {
                         "/api/*/available_quantities",
                         "/api/*/categories",
                         "/api/*/products").authenticated()
+                    .requestMatchers(HttpMethod.PUT,
+                        "/api/*/orders").authenticated()
                     .requestMatchers(HttpMethod.GET,
                         "/api/*/available_quantities/log").authenticated()
                     .anyRequest().permitAll()

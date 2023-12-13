@@ -168,7 +168,6 @@ public class OrderService {
     Order order = orderRepository.findById(orderId)
         .orElseThrow(() -> new NotFoundException("Order not found"));
     order.setStatus(status);
-    sendOrderConfirmationAndNotification(order);
     return orderRepository.save(order);
   }
 
