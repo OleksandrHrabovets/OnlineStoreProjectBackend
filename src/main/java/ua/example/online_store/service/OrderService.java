@@ -8,16 +8,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import org.webjars.NotFoundException;
 import ua.example.online_store.model.Cart;
 import ua.example.online_store.model.Currency;
 import ua.example.online_store.model.Order;
 import ua.example.online_store.model.OrderItem;
+import ua.example.online_store.model.Photo;
+import ua.example.online_store.model.SKUCharacteristic;
 import ua.example.online_store.model.enums.OrderStatus;
 import ua.example.online_store.repository.OrderItemRepository;
 import ua.example.online_store.repository.OrderRepository;
 import ua.example.online_store.service.email.EmailService;
 import ua.example.online_store.web.dto.OrderDeliveryDto;
+import ua.example.online_store.web.dto.OrderItemRecord;
 
 @Slf4j
 @Service
@@ -32,6 +37,7 @@ public class OrderService {
   private final SKUService skuService;
   private final AvailableQuantityService availableQuantityService;
   private final EmailService emailService;
+  private final TemplateEngine templateEngine;
 
   @Value("${app.email-sales-manager}")
   private String emailSalesManager;
@@ -90,45 +96,19 @@ public class OrderService {
   private void sendOrderConfirmationAndNotification(Order order) {
     Currency currency = order.getItems().get(0).getSku().getProduct().getPrice().getCurrency();
 
-    String message = order.getItems().stream()
-        .reduce(
-            """
-                Замовлення №%s
-                Статус: %s
-                Дякуємо за ваше замовлення в інтернет магазині ZATYSHNA
-                                
-                """
-                .formatted(order.getId(), "Прийняте в обробку"),
-            (s, orderItem) -> s + "\n   -"
-                + orderItem.getSku().getProduct().getTitle()
-                + "(" + skuService.skuCharacteristicsToString(orderItem.getSku()) + ")"
-                + "\tціна: "
-                + orderItem.getPrice()
-                + currency.getCode()
-                + "\tкількість: "
-                + orderItem.getQuantity()
-                + "\tсума: "
-                + orderItem.getAmount()
-                + currency.getCode(),
-            String::concat);
-    message = message + """
-                
-        ДОСТАВКА: за тарифами перевізника
-        ЗАГАЛОМ: %s %s
-                
-        Дані отримувача:
-        %s %s, %s
-        %s
-        Спосіб оплати: %s
-        """.formatted(order.getItems().stream()
-            .map(OrderItem::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add),
-        currency.getCode(),
-        order.getDelivery().getFirstName(),
-        order.getDelivery().getLastName(),
-        order.getDelivery().getCustomerPhoneNumber(),
-        order.getDelivery().getAddress(),
-        "при отриманні");
+    Context context = new Context();
+    context.setVariable("orderId", order.getId());
+    context.setVariable("orderStatus", "Прийняте в обробку");
+    context.setVariable("orderItems", getOrderItemRecords(order));
+    context.setVariable("totalAmount", order.getTotalAmount());
+    context.setVariable("currencyCode", currency.getCode());
+    context.setVariable("firstName", order.getDelivery().getFirstName());
+    context.setVariable("lastName", order.getDelivery().getLastName());
+    context.setVariable("customerPhoneNumber", order.getDelivery().getCustomerPhoneNumber());
+    context.setVariable("address", order.getDelivery().getAddress());
+
+    String message = templateEngine.process("email-order-details-customer", context);
+
     emailService.sendEmail(
         order.getDelivery().getEmail(),
         "Підтвердження Замовлення №%s".formatted(order.getId()),
@@ -189,5 +169,24 @@ public class OrderService {
         .orElseThrow(() -> new NotFoundException("Order not found"));
     order.setStatus(status);
     return orderRepository.save(order);
+  }
+
+  public List<OrderItemRecord> getOrderItemRecords(Order order) {
+    return order.getItems().stream()
+        .map(orderItem -> new OrderItemRecord(orderItem.getSku().getProduct().getTitle(),
+            orderItem.getSku().getCharacteristics().stream()
+                .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
+                    .equals("color")).findFirst().orElse(
+                    SKUCharacteristic.builder().value("").build()).getValue(),
+            orderItem.getSku().getCharacteristics().stream()
+                .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
+                    .equals("size")).findFirst().orElse(
+                    SKUCharacteristic.builder().value("").build()).getValue(),
+            orderItem.getSku().getProduct().getPhotos().stream()
+                .findFirst().orElse(Photo.builder().url("").build()).getUrl(),
+            orderItem.getPrice(),
+            orderItem.getQuantity(),
+            orderItem.getAmount())
+        ).toList();
   }
 }
