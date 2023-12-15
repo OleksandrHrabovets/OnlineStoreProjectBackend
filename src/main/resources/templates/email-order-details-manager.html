@@ -24,10 +24,7 @@
   </table>
   <table
       style="width: 100%; max-width: 900px; margin: 0 auto; text-align: center; border-collapse: collapse">
-    <caption style="margin-bottom: 16px; font-size: 18px; text-align: center;">Дякуємо за ваше
-      замовлення в інтернет
-      магазині
-      ZATYSHNA
+    <caption style="margin-bottom: 16px; font-size: 18px; text-align: center;">Дані замовлення:
     </caption>
     <thead style="font-size: 12px;">
     <tr>
@@ -65,27 +62,32 @@
   </table>
   <table style="width: 100%; margin: 0">
     <tr style="text-align: right">
-      <td colspan="2" style="line-height: 1.5">ДОСТАВКА: за тарифами перевiзника</td>
-    </tr>
-    <tr style="text-align: right">
-      <td colspan="2" style="line-height: 1.5">ЗАГАЛОМ: <span
+      <td colspan="2" style="line-height: 1.5">Загальна сума: <span
           th:text="${totalAmount}">totalAmount</span>
         <span
             th:text="${currencyCode}">UAH</span></td>
     </tr>
     <tr style="text-align: left">
-      <td colspan="2" style="line-height: 1.5">Дані отримувача:</td>
+      <td colspan="2" style="line-height: 1.5">Дані доставки:</td>
     </tr>
     <tr style="text-align: left">
       <td colspan="2" style="line-height: 1.5"
-          th:text="${firstName} + ' ' + ${lastName} + ', ' +${customerPhoneNumber}"></td>
+          th:text="'Ім’я: ' + ${firstName}"></td>
+    </tr>
+    <tr style="text-align: left">
+      <td colspan="2" style="line-height: 1.5"
+          th:text="'Прізвище: ' + ${lastName}"></td>
+    </tr>
+    <tr style="text-align: left">
+      <td colspan="2" style="line-height: 1.5"
+          th:text="'Номер телефону: ' + ${customerPhoneNumber}"></td>
     </tr>
     <tr style="text-align: left">
       <td colspan="2" style="line-height: 1.5">Адреса доставки: <span th:text="${address}"></span>
       </td>
     </tr>
     <tr style="text-align: left">
-      <td colspan="2" style="line-height: 1.5">Спосіб оплати: при отриманні</td>
+      <td colspan="2" style="line-height: 1.5">Спосіб оплати: Післяплата</td>
     </tr>
   </table>
 </div>
