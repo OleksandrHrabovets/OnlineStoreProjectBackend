@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 import ua.example.online_store.model.Currency;
 import ua.example.online_store.repository.CurrencyRepository;
 
@@ -34,5 +35,11 @@ public class CurrencyService {
   public List<Currency> getAll() {
     log.info("invoked method {}", "getAll()");
     return currencyRepository.findAll();
+  }
+
+  public Currency getDefaultCurrency() {
+    log.info("invoked method {}", "getDefaultCurrency()");
+    return currencyRepository.findById(1L)
+        .orElseThrow(() -> new NotFoundException("Default currency not found"));
   }
 }
