@@ -20,6 +20,9 @@ public class CartItemDto {
   @NotNull
   private BigDecimal amount;
   private String currencyCode;
+  private Long productId;
+  private String productTitle;
+  private String photoUrl;
 
   public String getCurrencyCode() {
     return DefaultValues.DEFAULT_CURRENCY_CODE;
