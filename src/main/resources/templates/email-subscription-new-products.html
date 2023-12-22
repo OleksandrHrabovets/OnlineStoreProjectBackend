@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New products notification</title>
+</head>
+<body style="display: flex; justify-content: center; align-items: center; margin: 0;">
+<div style="display: inline-block; padding: 10px 50px; overflow-y: auto">
+  <table style="width: 100%; max-width: 900px; margin: 0 auto; border-collapse: collapse;">
+    <tbody>
+    <tr>
+      <td rowspan=" 2" style="text-transform: uppercase; font-size: 32px">ZATYSHNA</td>
+    </tr>
+    </tbody>
+  </table>
+  <table
+      style="width: 100%; max-width: 900px; margin: 0 auto; text-align: center; border-collapse: collapse">
+    <caption style="margin-bottom: 16px; font-size: 18px; text-align: center;">Нові товари в нашому
+      магазині:
+    </caption>
+    <thead style="font-size: 12px;">
+    <tr>
+      <th style="width: max-content; padding: 8px; border-bottom: 2px solid grey">Найменування
+        товару
+      </th>
+      <th style="width: 150px; padding: 8px; border-bottom: 2px solid grey">Ціна</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr style="font-size: 12px;" th:each="item : ${newProducts}">
+      <td style="display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 2px solid grey">
+        <img
+            th:src="${item.photoUrl}"
+            alt="product image" style="width: 110px;">
+        <div style="text-align: left; vertical-align: center">
+          <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis"
+             th:text="${item.title}">title</p>
+          <p th:text="${item.color}">color</p>
+          <p th:text="${item.size}">size</p>
+        </div>
+      </td>
+      <td style="padding: 8px; border-bottom: 2px solid grey"
+          th:text="${item.price} + ' ' + ${item.currencyCode}">price
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <table style="width: 100%; margin: 0">
+    <tr style="text-align: left">
+      <td colspan="2" style="line-height: 1.5">Відписатись від новин можете за посиланням:
+        [unsubscribeLink]
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>

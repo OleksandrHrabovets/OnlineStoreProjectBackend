@@ -1,5 +1,6 @@
 package ua.example.online_store.service.subscription;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import org.webjars.NotFoundException;
+import ua.example.online_store.model.Photo;
+import ua.example.online_store.model.SKUCharacteristic;
 import ua.example.online_store.model.subscription.Subscriber;
 import ua.example.online_store.model.subscription.Subscription;
 import ua.example.online_store.service.SKUService;
@@ -20,11 +25,11 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
 
   public static final long ID = 1L;
   public static final String BASE_TITLE = "Нові товари в нашому магазині";
-  public static final String BASE_MESSAGE = "Нові товари в нашому магазині:";
   private final SubscriptionService subscriptionService;
   private final SubscriberService subscriberService;
   private final SKUService skuService;
   private final EmailService emailService;
+  private final TemplateEngine templateEngine;
 
   @Value("${app.front.url}")
   private String frontUrl;
@@ -53,35 +58,52 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
 
     List<String> subscribers = subscriberService.findAllBySubscriptionId(ID).stream()
         .map(Subscriber::getEmail).toList();
-    final String message = skuToString();
-    if (!BASE_MESSAGE.equals(message)) {
+    List<NewProduct> newProducts = getNewProducts();
+    final String message = templateEngine.process("email-subscription-new-products",
+        getContext(newProducts));
+    if (!newProducts.isEmpty()) {
       subscribers.forEach(
           email -> emailService.sendEmail(email, BASE_TITLE, message
-              + footerText(email))
-      );
+              .replace("[unsubscribeLink]", unsubscribeLink(email))
+          ));
       log.info("Notify subscribers successfully");
     } else {
       log.info("There are no new SKU for subscribers notify");
     }
   }
 
-  private String skuToString() {
+  private Context getContext(List<NewProduct> newProducts) {
+
+    Context context = new Context();
+    context.setVariable("newProducts", newProducts);
+    return context;
+  }
+
+  private List<NewProduct> getNewProducts() {
     return skuService.findAllCreatedIsAfter(LocalDateTime.now().minusDays(1)).stream()
-        .reduce(
-            BASE_MESSAGE,
-            (s, sku) -> s + "\n   -"
-                + sku.getProduct().getTitle() + "(" +
-                skuService.skuCharacteristicsToString(sku) + ") - ціна "
-                + sku.getProduct().getPrice().getValue()
-                + sku.getProduct().getPrice().getCurrency().getCode(),
-            String::concat);
+        .map(sku ->
+            new NewProduct(sku.getProduct().getTitle(),
+                sku.getCharacteristics().stream()
+                    .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
+                        .equals("color")).findFirst().orElse(
+                        SKUCharacteristic.builder().value("").build()).getValue(),
+                sku.getCharacteristics().stream()
+                    .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
+                        .equals("size")).findFirst().orElse(
+                        SKUCharacteristic.builder().value("").build()).getValue(),
+                sku.getProduct().getPhotos().stream()
+                    .findFirst().orElse(Photo.builder().url("").build()).getUrl(),
+                sku.getProduct().getPrice().getValue(),
+                sku.getProduct().getPrice().getCurrency().getCode()))
+        .toList();
   }
 
-  private String footerText(String email) {
-    return """
-                
-        Відписатись від новин можете за посиланням: %s"""
-        .formatted(frontUrl + "/unsubscribe?email=" + email);
+  record NewProduct(String title, String color, String size, String photoUrl,
+                    BigDecimal price, String currencyCode) {
+
   }
 
+  private String unsubscribeLink(String email) {
+    return frontUrl + "/unsubscribe?email=" + email;
+  }
 }
