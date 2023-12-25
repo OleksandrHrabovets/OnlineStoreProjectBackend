@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Digits;
@@ -50,6 +51,7 @@ public class Order {
   private OrderDelivery delivery;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = OrderItem.class, mappedBy = "order")
   @Fetch(FetchMode.SUBSELECT)
+  @OrderBy("id")
   private List<OrderItem> items;
 
   public BigDecimal getTotalQuantity() {
