@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Digits;
 import java.math.BigDecimal;
@@ -40,6 +41,7 @@ public class Cart {
   private BigDecimal totalAmount;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = CartItem.class, mappedBy = "cart")
   @Fetch(FetchMode.SUBSELECT)
+  @OrderBy("id")
   private List<CartItem> items;
 
   public BigDecimal getTotalQuantity() {
