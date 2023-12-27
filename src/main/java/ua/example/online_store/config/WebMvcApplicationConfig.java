@@ -12,6 +12,7 @@ public class WebMvcApplicationConfig implements WebMvcConfigurer {
     String crossOrigins = "*";
     registry.addMapping("/api/**")
         .allowedOrigins(crossOrigins)
+        .allowedMethods("GET", "POST", "PUT", "DELETE")
         .maxAge(3600);
   }
 
