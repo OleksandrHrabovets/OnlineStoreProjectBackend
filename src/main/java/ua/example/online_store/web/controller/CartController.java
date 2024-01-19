@@ -1,5 +1,6 @@
 package ua.example.online_store.web.controller;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.webjars.NotFoundException;
+import ua.example.online_store.model.AvailableQuantity;
+import ua.example.online_store.service.AvailableQuantityService;
 import ua.example.online_store.service.CartService;
 import ua.example.online_store.web.dto.ApiMessage;
 import ua.example.online_store.web.dto.CartAddItemDto;
@@ -30,22 +33,35 @@ public class CartController {
 
   public static final String INVOKED_METHOD = "invoked method {}";
   private final CartService cartService;
+  private final AvailableQuantityService availableQuantityService;
   private final CartMapper cartMapper;
   private final CartItemMapper cartItemMapper;
 
   @GetMapping
   public ResponseEntity<CartDto> get(@RequestParam String sessionId) {
     log.info(INVOKED_METHOD, "get()");
-    return ResponseEntity.ok(cartMapper.toDto(cartService.getBySessionId(sessionId)
-        .orElseThrow(() -> new NotFoundException("sessionId not found"))));
+    CartDto cartDto = cartMapper.toDto(cartService.getBySessionId(sessionId)
+        .orElseThrow(() -> new NotFoundException("sessionId not found")));
+    cartDto.getItems().forEach(this::setAvailableQuantity);
+    return ResponseEntity.ok(cartDto);
   }
 
   @PostMapping
   public ResponseEntity<CartItemDto> add(@RequestBody CartAddItemDto cartAddItemDto) {
 
     log.info(INVOKED_METHOD, "add()");
+    CartItemDto cartItemDto = cartItemMapper.toDto(cartService.add(cartAddItemDto));
+    setAvailableQuantity(cartItemDto);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(cartItemMapper.toDto(cartService.add(cartAddItemDto)));
+        .body(cartItemDto);
+  }
+
+  private void setAvailableQuantity(CartItemDto cartItemDto) {
+    cartItemDto.getSku().setAvailableQuantity(
+        availableQuantityService.findBySkuId(cartItemDto.getSku().getId())
+            .orElse(AvailableQuantity.builder()
+                .quantity(BigDecimal.ZERO)
+                .build()).getQuantity());
   }
 
   @DeleteMapping
