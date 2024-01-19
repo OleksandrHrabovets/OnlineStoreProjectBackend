@@ -32,4 +32,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
   List<Price> minPriceInCategory(Long categoryId, Pageable pageable);
 
   Optional<Product> findByTitle(String title);
+
+  List<Product> findAllByTitle(String title);
 }
