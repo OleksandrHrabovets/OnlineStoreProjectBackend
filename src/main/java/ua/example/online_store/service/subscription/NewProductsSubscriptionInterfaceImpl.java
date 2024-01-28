@@ -3,6 +3,7 @@ package ua.example.online_store.service.subscription;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.thymeleaf.context.Context;
 import org.webjars.NotFoundException;
 import ua.example.online_store.model.Photo;
 import ua.example.online_store.model.Product;
+import ua.example.online_store.model.SKU;
 import ua.example.online_store.model.SKUCharacteristic;
 import ua.example.online_store.model.subscription.Subscriber;
 import ua.example.online_store.model.subscription.Subscription;
@@ -84,38 +86,45 @@ public class NewProductsSubscriptionInterfaceImpl implements SubscriptionInterfa
 
   private List<NewProductGroup> getNewProducts() {
     return skuService.findAllCreatedIsAfter(LocalDateTime.now().minusDays(1)).stream()
-        .map(sku ->
-            new NewProduct(sku.getProduct(),
-                sku.getProduct().getTitle(),
-                sku.getCharacteristics().stream()
-                    .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
-                        .equals("color")).findFirst().orElse(
-                        SKUCharacteristic.builder().value("").build()).getValue(),
-                sku.getCharacteristics().stream()
-                    .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
-                        .equals("size")).findFirst().orElse(
-                        SKUCharacteristic.builder().value("").build()).getValue(),
-                sku.getProduct().getPhotos().stream()
-                    .findFirst().orElse(Photo.builder().url("").build()).getUrl(),
-                sku.getProduct().getPrice().getValue(),
-                sku.getProduct().getPrice().getCurrency().getCode()))
+        .map(NewProductsSubscriptionInterfaceImpl::mapToNewProduct)
         .collect(Collectors.groupingBy(newProduct -> newProduct.product))
         .entrySet().stream()
-        .map(entry -> new NewProductGroup(entry.getKey().getTitle(),
-            entry.getValue().stream()
-                .map(newProduct -> newProduct.color)
-                .collect(Collectors.toSet()),
-            entry.getValue().stream()
-                .map(newProduct -> newProduct.size)
-                .collect(Collectors.toSet()),
-            entry.getValue().stream().limit(1).map(newProduct -> newProduct.photoUrl)
-                .findFirst().orElse(""),
-            entry.getValue().stream().limit(1).map(newProduct -> newProduct.price)
-                .findFirst().orElse(BigDecimal.ZERO),
-            entry.getValue().stream().limit(1).map(newProduct -> newProduct.currencyCode)
-                .findFirst().orElse(""))
+        .map(NewProductsSubscriptionInterfaceImpl::mapToNewProductGroup
         )
         .toList();
+  }
+
+  private static NewProduct mapToNewProduct(SKU sku) {
+    return new NewProduct(sku.getProduct(),
+        sku.getProduct().getTitle(),
+        sku.getCharacteristics().stream()
+            .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
+                .equals("color")).findFirst().orElse(
+                SKUCharacteristic.builder().value("").build()).getValue(),
+        sku.getCharacteristics().stream()
+            .filter(skuCharacteristic -> skuCharacteristic.getCharacteristic().getTitle()
+                .equals("size")).findFirst().orElse(
+                SKUCharacteristic.builder().value("").build()).getValue(),
+        sku.getProduct().getPhotos().stream()
+            .findFirst().orElse(Photo.builder().url("").build()).getUrl(),
+        sku.getProduct().getPrice().getValue(),
+        sku.getProduct().getPrice().getCurrency().getCode());
+  }
+
+  private static NewProductGroup mapToNewProductGroup(Entry<Product, List<NewProduct>> entry) {
+    return new NewProductGroup(entry.getKey().getTitle(),
+        entry.getValue().stream()
+            .map(newProduct -> newProduct.color)
+            .collect(Collectors.toSet()),
+        entry.getValue().stream()
+            .map(newProduct -> newProduct.size)
+            .collect(Collectors.toSet()),
+        entry.getValue().stream().limit(1).map(newProduct -> newProduct.photoUrl)
+            .findFirst().orElse(""),
+        entry.getValue().stream().limit(1).map(newProduct -> newProduct.price)
+            .findFirst().orElse(BigDecimal.ZERO),
+        entry.getValue().stream().limit(1).map(newProduct -> newProduct.currencyCode)
+            .findFirst().orElse(""));
   }
 
   record NewProduct(Product product, String title, String color, String size, String photoUrl,
