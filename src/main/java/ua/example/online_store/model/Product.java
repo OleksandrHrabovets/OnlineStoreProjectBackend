@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -45,9 +46,11 @@ public class Product {
   private LocalDateTime createdAt;
   @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Fetch(FetchMode.SUBSELECT)
+  @OrderBy("id")
   private List<SKU> skuSet;
   @OneToMany(mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @Fetch(FetchMode.SUBSELECT)
+  @OrderBy("id")
   private List<Photo> photos;
 
 }

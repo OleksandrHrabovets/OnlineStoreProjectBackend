@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,7 @@ public class SKU {
   private LocalDateTime createdAt;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = SKUCharacteristic.class, mappedBy = "sku")
   @Fetch(FetchMode.SUBSELECT)
+  @OrderBy("id")
   private List<SKUCharacteristic> characteristics;
   private boolean status;
 
