@@ -40,7 +40,7 @@ public class SKU {
   private LocalDateTime createdAt;
   @OneToMany(fetch = FetchType.EAGER, targetEntity = SKUCharacteristic.class, mappedBy = "sku")
   @Fetch(FetchMode.SUBSELECT)
-  @OrderBy("id")
+  @OrderBy("characteristic.id")
   private List<SKUCharacteristic> characteristics;
   private boolean status;
 
